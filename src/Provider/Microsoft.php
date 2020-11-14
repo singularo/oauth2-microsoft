@@ -141,7 +141,7 @@ class Microsoft extends AbstractProvider
     {
         $uri = new Uri($this->urlResourceOwnerDetails);
 
-        return (string) Uri::withQueryValue($uri, 'access_token', (string) $token);
+        return (string) $uri;
     }
 
     /**
@@ -170,5 +170,30 @@ class Microsoft extends AbstractProvider
             default:
                 return [];
         }
+    }
+
+    /**
+     * Requests resource owner details.
+     *
+     * @param  AccessToken $token
+     * @return mixed
+     */
+    protected function fetchResourceOwnerDetails(AccessToken $token)
+    {
+        $url = $this->getResourceOwnerDetailsUrl($token);
+
+        $this->setAccessTokenType(self::ACCESS_TOKEN_TYPE_BEARER);
+
+        $request = $this->getAuthenticatedRequest(self::METHOD_GET, $url, $token);
+
+        $response = $this->getParsedResponse($request);
+
+        if (false === is_array($response)) {
+          throw new UnexpectedValueException(
+            'Invalid response received from Authorization Server. Expected JSON.'
+          );
+        }
+
+        return $response;
     }
 }
